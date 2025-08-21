@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Flask Input Form with Output</title>
+  <style>
+    body {
+      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+      background: linear-gradient(135deg, #667eea, #764ba2);
+    }
+
+    .container {
+      background: white;
+      padding: 30px;
+      border-radius: 15px;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+      width: 400px;
+      text-align: center;
+    }
+
+    h2 {
+      margin-bottom: 20px;
+      color: #444;
+    }
+
+    textarea {
+      width: 90%;
+      height: 100px;
+      padding: 12px;
+      border: 2px solid #ddd;
+      border-radius: 8px;
+      outline: none;
+      transition: 0.3s;
+      margin-bottom: 20px;
+      resize: none;
+    }
+
+    textarea:focus {
+      border-color: #667eea;
+      box-shadow: 0 0 8px rgba(102,126,234,0.6);
+    }
+
+    button {
+      padding: 10px 16px;
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      border: none;
+      color: white;
+      font-size: 14px;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: 0.3s;
+      margin-top: 5px;
+    }
+
+    button:hover {
+      background: linear-gradient(135deg, #5a67d8, #6b46c1);
+      transform: scale(1.05);
+    }
+
+    .output {
+      margin-top: 20px;
+      text-align: left;
+    }
+
+    .output-box {
+      background: #f7f7f7;
+      padding: 10px;
+      border-radius: 8px;
+      margin-bottom: 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .output-text {
+      word-break: break-all;
+      max-width: 80%;
+      color: #333;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Encrypt Your Data here</h2>
+    <form id="encode-form" action="/process" method="POST">
+      <textarea id="user_input" name="user_input" placeholder="Type something..." required></textarea>
+      <br>
+      <button id="submit-btn" type="submit">Submit</button>
+    </form>
+
+    <!-- OUTPUT PANEL -->
+    <div class="output">
+      <div class="output-box">
+        <div class="output-text" id="code">EncryptedCode:-</div>
+        <button id="copy-code" type="button">Copy</button>
+      </div>
+      <div class="output-box">
+        <div class="output-text" id="key">Key:-</div>
+        <button id="copy-key" type="button">Copy</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const form = document.getElementById('encode-form');
+    const input = document.getElementById('user_input');
+    const submitBtn = document.getElementById('submit-btn');
+    const codeDiv = document.getElementById('code');
+    const keyDiv = document.getElementById('key');
+    const copyCodeBtn = document.getElementById('copy-code');
+    const copyKeyBtn = document.getElementById('copy-key');
+
+    form.addEventListener('submit', async function (e) {
+      e.preventDefault();
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Processing...';
+
+      const text = input.value.trim();
+      if (!text) {
+        alert('Please enter some text.');
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Submit';
+        return;
+      }
+
+      try {
+        const res = await fetch('/process', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ text })
+        });
+
+        if (!res.ok) {
+          const txt = await res.text();
+          throw new Error(txt || 'Server error');
+        }
+
+        const data = await res.json();
+        // The server returns secured_binary and key_text (and encoded optionally)
+        codeDiv.innerText = 'EncryptedCode: ' + (data.secured_binary || data.secured || '');
+        keyDiv.innerText = 'Key: ' + (data.key_text || data.key || '');
+      } catch (err) {
+        alert('Error: ' + (err.message || err));
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Submit';
+      }
+    });
+
+    copyCodeBtn.addEventListener('click', () => {
+      const text = codeDiv.innerText.replace(/^EncryptedCode:\s*/, '');
+      navigator.clipboard.writeText(text).then(() => {
+        alert('Copied encrypted code');
+      }, () => {
+        alert('Copy failed');
+      });
+    });
+
+    copyKeyBtn.addEventListener('click', () => {
+      const text = keyDiv.innerText.replace(/^Key:\s*/, '');
+      navigator.clipboard.writeText(text).then(() => {
+        alert('Copied key');
+      }, () => {
+        alert('Copy failed');
+      });
+    });
+  </script>
+</body>
+</html>
