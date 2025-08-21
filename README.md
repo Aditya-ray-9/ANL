@@ -1,6 +1,6 @@
 # 🔐 ANL5 – Advanced Numeric Lock Encryption
 
-ANL5 (**Advanced Numeric Lock v5**) is a custom **encryption & decryption system** written in Python. It converts text into an ANL numeric code, then into binary, and secures the binary using a generated key. The module is modular and easy to integrate with Flask or other Python apps.
+ANL5 (**Advanced Numeric Lock v5**) is a custom **encryption & decryption system** written in Python. It converts text into an ANL numeric code, then into binary, and secures the binary using a generated key. The module is modular and easy to integrate with Flask or other Python apps. its developer is Aditya Ray a python developer
 
 ---
 
